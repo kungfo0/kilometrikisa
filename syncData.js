@@ -1,4 +1,3 @@
-const axios = require('axios')
 const requestp = require('request-promise-native')
 
 const rp = requestp.defaults({
@@ -68,7 +67,7 @@ function parseRides (entries) {
   return result
 }
 
-async function doStuff () {
+async function loginToKilometrikisa () {
   const regex = /(.*)(csrfmiddlewaretoken)(.*)(value=')(.*)(')/gm
   const regex2 = /(.*)(csrfToken)(.*)(")(.*)(";)/gm
   const regex3 = /(.*)(contestId = )(.*)(;)/gm
@@ -103,10 +102,10 @@ async function doStuff () {
 
 async function syncData () {
   try {
-    const sheetData = await axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/${process.env.SHEET_NAME}!A1:E1000?key=${process.env.GOOGLE_API_KEY}`)
-    const rides = parseRides(sheetData.data.values)
+    const sheetData = await rp.get(`https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/${process.env.SHEET_NAME}!A1:E1000?key=${process.env.GOOGLE_API_KEY}`)
+    const rides = parseRides(JSON.parse(sheetData).values)
 
-    const { csrfToken, contestId } = await doStuff()
+    const { csrfToken, contestId } = await loginToKilometrikisa()
 
     for (const ride of rides) {
       const formData = {
@@ -124,6 +123,7 @@ async function syncData () {
         }
       }
 
+      // Uses sessionId from previous requests
       await rp(kilometers)
 
       let minutes = {
@@ -137,6 +137,7 @@ async function syncData () {
         }
       }
 
+      // Uses sessionId from previous requests
       await rp(minutes)
     }
     return 'Data successfully synced.'
@@ -145,5 +146,6 @@ async function syncData () {
     throw Error('Error syncing data.')
   }
 }
+syncData()
 
 module.exports = syncData
