@@ -85,7 +85,6 @@ async function doStuff () {
     },
     headers: {
       'Referer': 'https://www.kilometrikisa.fi/accounts/login/'
-
     }
   }
 
