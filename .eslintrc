@@ -1,0 +1,7 @@
+{
+  "plugins": ["mocha"],
+  "extends": "standard",
+  "env": {
+    "mocha": true
+  }
+}

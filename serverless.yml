@@ -1,0 +1,53 @@
+service: kilometrikisa
+
+custom: ${file(config/${self:provider.stage}.yml)}
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  runtime: nodejs8.10
+  memorySize: 1024
+  timeout: 120
+  environment:
+    API_KEY: ${self:custom.API_KEY}
+    CUSTOM_CHROME: ${self:custom.CUSTOM_CHROME}
+    SHEET_ID: ${self:custom.SHEET_ID}
+    SHEET_NAME: ${self:custom.SHEET_NAME}
+    GOOGLE_API_KEY: ${self:custom.GOOGLE_API_KEY}
+    KILOMETRIKISA_USER: ${self:custom.KILOMETRIKISA_USER}
+    KILOMETRIKISA_PWD: ${self:custom.KILOMETRIKISA_PWD}
+
+  iamRoleStatements:
+  -
+    Effect: 'Allow'
+    Action: [ 'lambda:InvokeFunction' ]
+    Resource:
+      Fn::Join: [':', [ 'arn:aws:lambda', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'function:${self:service}-${self:provider.stage}-*' ] ]
+  -
+    Effect: Allow
+    Action:
+    - s3:*
+    Resource: "*"
+
+layers:
+  nodeDependencies:
+    path: layer
+    compatibleRuntimes:
+      - nodejs8.10
+
+package:
+  exclude:
+  - ./node_modules/**
+  - ./layer/**
+
+functions:
+  triggerDataSync:
+    layers:
+      - {Ref: NodeDependenciesLambdaLayer}
+    handler: handler.triggerDataSync
+    events:
+      - http:
+          path: kilometrikisa/sync
+          method: get
+          # private: true

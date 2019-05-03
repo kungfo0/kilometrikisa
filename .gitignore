@@ -1,0 +1,13 @@
+# package directories
+node_modules
+layer
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# Configuration variables
+config
+
+*.iml
+.idea
