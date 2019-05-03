@@ -31,7 +31,7 @@ functions:
   triggerDataSync:
     layers:
       - {Ref: NodeDependenciesLambdaLayer}
-    handler: handler.triggerDataSync
+    handler: src/handler.triggerDataSync
     events:
       - http:
           path: kilometrikisa/sync
