@@ -3,7 +3,7 @@ const googleSheetsClient = require('./services/googleSheetsClient')
 
 async function syncData () {
   try {
-    const rides = await googleSheetsClient.getRides(process.env.SHEET_ID, process.env.SHEET_NAME, process.env.GOOGLE_API_KEY, new Date('2019-05-01'))
+    const rides = await googleSheetsClient.getRides(process.env.SHEET_ID, process.env.SHEET_NAME, process.env.GOOGLE_API_KEY)
 
     const { csrfToken, contestId } = await kilometrikisaClient.login()
     const commonData = {

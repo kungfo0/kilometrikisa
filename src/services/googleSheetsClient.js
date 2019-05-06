@@ -56,7 +56,8 @@ function parseRides (entries, startDate) {
   return result
 }
 
-async function getRides (sheetId, sheetName, googleApiKey, startDate) {
+// startDate default value is yesterday
+async function getRides (sheetId, sheetName, googleApiKey, startDate = new Date(Date.now() - 86400000)) {
   try {
     const sheetData = await rp.get(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:E1000?key=${googleApiKey}`)
     return parseRides(JSON.parse(sheetData).values, startDate)
