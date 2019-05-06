@@ -20,6 +20,33 @@ Array.prototype.sum = function (prop) {
   return total
 }
 
+function getSeconds (numericTime, timeType) {
+  if (timeType === 'second' || timeType === 'seconds') {
+    return numericTime
+  } else if (timeType === 'minute' || timeType === 'minutes') {
+    return numericTime * 60
+  } else if (timeType === 'hour' || timeType === 'hours') {
+    return numericTime * 60 * 60
+  } else {
+    return 0
+  }
+}
+
+function parseTimesToSeconds (times) {
+  const regex = /(\d+)\s(\w+)/gm
+  const matches = times.match(regex)
+  let seconds = 0
+
+  for (const match of matches) {
+    const timeAndType = match.match(/(\d+)\s(\w+)/)
+    if (timeAndType && timeAndType.length === 3) {
+      seconds += getSeconds(parseInt(timeAndType[1]), timeAndType[2])
+    }
+  }
+
+  return seconds
+}
+
 function parseRides (entries, startDate) {
   const parsedEntries = []
   for (const entry of entries) {
@@ -29,11 +56,11 @@ function parseRides (entries, startDate) {
       const month = date.getMonth() + 1
       const day = date.getDate()
       const isoDate = year + '-' + pad(month, 2) + '-' + pad(day, 2)
+      let seconds = parseTimesToSeconds(entry[3])
       const meters = parseFloat(entry[2])
-      const minutes = parseInt(entry[3].substr(0, entry[3].indexOf(' minutes, ')))
-      const seconds = (minutes * 60) + parseInt(entry[3].substring(entry[3].indexOf(', ') + 2, entry[3].indexOf('second') - 1))
       if (date >= startDate) {
-        parsedEntries.push({ date, isoDate, meters, seconds })
+        const entry = { date, isoDate, meters, seconds }
+        parsedEntries.push(entry)
       }
     } catch (e) {
       console.log(e)
@@ -56,8 +83,8 @@ function parseRides (entries, startDate) {
   return result
 }
 
-// startDate default value is yesterday
-async function getRides (sheetId, sheetName, googleApiKey, startDate = new Date(Date.now() - 86400000)) {
+// startDate default value is 48h ago
+async function getRides (sheetId, sheetName, googleApiKey, startDate = new Date(Date.now() - (86400000 * 2))) {
   try {
     const sheetData = await rp.get(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:E1000?key=${googleApiKey}`)
     return parseRides(JSON.parse(sheetData).values, startDate)

@@ -48,8 +48,8 @@ const logMinutes = async (commonData, minutes, date) => {
     uri: 'https://www.kilometrikisa.fi/contest/minute-log-save/',
     form: {
       ...commonData,
-      hours: '',
-      minutes,
+      hours: Math.floor(minutes / 60),
+      minutes: minutes % 60,
       date
     }
   }
